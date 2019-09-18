@@ -2,34 +2,37 @@
 
 require 'active_support/core_ext'
 
+# Speak Pig Latin.
 class PigLatin
   CONSONANT = /[^auoieAUOIE]/.freeze
+  UPCASE = /[A-Z]/.freeze
 
   def convert(words)
-    words.split(/(\w+)/).map {|word| convert_word(word) }.join
+    words
+      .split(/(\w+)/)
+      .map { |word| convert_word(word) }
+      .join
   end
 
   def convert_word(word)
-    return word unless word.match(/\w/)
+    return word unless word =~ /\w/
 
-    tail = word
-    first = ''
+    letters_to_move = letters_to_move(word)
+    tail = word.from(letters_to_move)
+    first = word.first(letters_to_move).downcase
 
-    if word[0..1] != 'ch'
-      letters_to_move = 1
+    tail = tail.upcase_first if word.first =~ UPCASE
+
+    "#{tail}#{first}ay"
+  end
+
+  def letters_to_move(word)
+    if word.first(2) == 'ch'
+      2
+    elsif word.first =~ CONSONANT
+      1
     else
-      letters_to_move = 2
+      0
     end
-
-    uppercased = word.first =~ /[A-Z]/
-
-    if word.first =~ CONSONANT
-      tail = word[letters_to_move..-1]
-      first = word.slice(0, letters_to_move)
-    end
-
-    tail = tail.capitalize if uppercased
-
-    "#{tail}#{first.downcase}ay"
   end
 end
